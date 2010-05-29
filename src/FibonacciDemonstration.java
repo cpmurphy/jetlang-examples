@@ -8,7 +8,7 @@ import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class FibonacciDemonstration {
     // Simple immutable class that serves as a message
@@ -81,7 +81,7 @@ public class FibonacciDemonstration {
 
     public void doDemonstration() throws InterruptedException {
 
-        List<Disposable> disposables = new ArrayList<Disposable>();
+        Collection<Disposable> disposables = new ArrayList<Disposable>();
         try {
             // Two instances of the calculator are created.  One is named "Odd"
             // (it calculates the 1st, 3rd, 5th... values in the sequence) the
@@ -122,9 +122,3 @@ public class FibonacciDemonstration {
         demo.doDemonstration();
     }
 }
-    
-    
-    
-    
-    
-    

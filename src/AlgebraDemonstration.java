@@ -4,6 +4,7 @@ import org.jetlang.channels.Subscriber;
 import org.jetlang.core.Callback;
 import org.jetlang.core.DisposingExecutor;
 import org.jetlang.core.RunnableExecutorImpl;
+import org.jetlang.fibers.Fiber;
 import org.jetlang.fibers.ThreadFiber;
 
 import java.util.ArrayList;
@@ -110,13 +111,13 @@ public class AlgebraDemonstration {
     // publishes them out.
     private class QuadraticSource {
         // The class has its own thread to use for publishing.
-        private final ThreadFiber _threadFiber;
+        private final Fiber _fiber;
         private final List<Channel<Quadratic>> _channels;
         private final int _numberToGenerate;
         private final Random _random;
 
-        public QuadraticSource(ThreadFiber threadFiber, List<Channel<Quadratic>> channels, int numberToGenerate, int seed) {
-            this._threadFiber = threadFiber;
+        public QuadraticSource(Fiber fiber, List<Channel<Quadratic>> channels, int numberToGenerate, int seed) {
+            this._fiber = fiber;
             this._channels = channels;
             this._numberToGenerate = numberToGenerate;
             _random = new Random(seed);
@@ -130,7 +131,7 @@ public class AlgebraDemonstration {
                 _channels.get(quadratic.getA()).publish(quadratic);
             }
             // Once all the quadratics have been published, stop.
-            _threadFiber.dispose();
+            _fiber.dispose();
         }
 
         // This simply creates a pseudo-random quadratic.
@@ -194,11 +195,11 @@ public class AlgebraDemonstration {
     // the solved quadratics (or whatever) all streaming out across
     // the same socket.
     private class SolvedQuadraticSink {
-        private final ThreadFiber _fiber;
+        private final Fiber _fiber;
         private final int _numberToOutput;
         private int _solutionsReceived = 0;
 
-        public SolvedQuadraticSink(ThreadFiber fiber, Subscriber<SolvedQuadratic> solvedChannel,
+        public SolvedQuadraticSink(Fiber fiber, Subscriber<SolvedQuadratic> solvedChannel,
                                    int numberToOutput) {
             this._fiber = fiber;
             this._numberToOutput = numberToOutput;
@@ -248,7 +249,7 @@ public class AlgebraDemonstration {
         Channel<SolvedQuadratic> solvedChannel = new MemoryChannel<SolvedQuadratic>();
 
         for (int idx = 0; idx < numberOfQuadratics; idx++) {
-            ThreadFiber fiber = createDaemonThreadFiberNamed("solver " + (idx + 1));
+            Fiber fiber = createDaemonThreadFiberNamed("solver " + (idx + 1));
             fiber.start();
 
             MemoryChannel<Quadratic> channel = new MemoryChannel<Quadratic>();
